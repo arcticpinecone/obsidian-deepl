@@ -164,54 +164,45 @@ export default class DeepLPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "deepl-translate-selection-from-to",
-			name: "Translate selection: From a language to another",
-			editorCallback: async (editor: Editor) => {
-				if (editor.getSelection() === "") {
-					return;
-				}
+		    id: "deepl-translate-selection-append",
+		    name: "Translate selection: To language and append to selection",
+		    editorCallback: async (editor: Editor) => {
+		        if (editor.getSelection() === "") {
+		            return;
+		        }
 
-				new TranslateModal(
-					app,
-					"From",
-					Object.entries(fromLanguages).map(([code, name]) => ({
-						code,
-						name,
-					})),
-					async (from) => {
-						new TranslateModal(
-							app,
-							"To",
-							Object.entries(toLanguages).map(([code, name]) => ({
-								code,
-								name,
-							})),
-							async (to) => {
-								try {
-									const translation =
-										await this.deeplService.translate(
-											editor.getSelection(),
-											to.code,
-											from.code
-										);
-									editor.replaceSelection(
-										translation[0].text
-									);
-								} catch (error) {
-									if (error instanceof DeepLException) {
-										new Notice(error.message);
-									} else {
-										console.error(error, error.stack);
-										new Notice(
-											"An unknown error occured. See console for details."
-										);
-									}
-								}
-							}
-						).open();
-					}
-				).open();
-			},
+		        const selection = editor.getSelection();
+
+		        new TranslateModal(
+		            app,
+		            "To",
+		            Object.entries(toLanguages).map(([code, name]) => ({
+		                code,
+		                name,
+		            })),
+		            async (language) => {
+		                try {
+		                    const translation = await this.deeplService.translate(
+		                        selection,
+		                        language.code,
+		                        this.settings.fromLanguage
+		                    );
+		                    // Append a newline if the setting is enabled
+		                    const textToAppend = this.settings.appendNewLine ? `\n${translation[0].text}` : translation[0].text;
+		                    editor.replaceSelection(`${selection}${textToAppend}`);
+		                } catch (error) {
+		                    if (error instanceof DeepLException) {
+		                        new Notice(error.message);
+		                    } else {
+		                        console.error(error, error.stack);
+		                        new Notice(
+		                            "An unknown error occurred. See console for details."
+		                        );
+		                    }
+		                }
+		            }
+		        ).open();
+		    },
 		});
 	}
 
