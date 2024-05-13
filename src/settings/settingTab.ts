@@ -49,6 +49,10 @@ export class SettingTab extends PluginSettingTab {
 				"The target language can be selected by suggestion modal. The translation will be appended to the selection."
 			);
 
+        new Setting(containerEl)
+            .setName("Translate selection: Automatically append selection")
+            .setDesc("The translation will be appended to the selection using the 'To language' setting automatically, without the suggestion modal.");
+
 		containerEl.createEl("h4", {
 			text: "Language settings",
 		});
@@ -105,6 +109,18 @@ export class SettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					})
 			);
+
+        new Setting(containerEl)
+            .setName("When appending text, add a new line before appending the translation?")
+            .setDesc("If enabled, adds a new line before appending the translated text.")
+            .addToggle((toggle) => 
+                toggle
+                    .setValue(this.plugin.settings.appendNewLine)
+                    .onChange(async (value) => {
+                        this.plugin.settings.appendNewLine = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
 
 		containerEl.createEl("h4", {
 			text: "Authentication settings",

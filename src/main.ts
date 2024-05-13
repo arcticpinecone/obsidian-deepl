@@ -96,6 +96,35 @@ export default class DeepLPlugin extends Plugin {
 		});
 
 		this.addCommand({
+            id: "translate-and-append-selection-automatically",
+            name: "Translate selection: Automatically append selection",
+            editorCallback: async (editor: Editor) => {
+                const selection = editor.getSelection();
+                if (selection === "") {
+                    new Notice("No text selected.");
+                    return;
+                }
+
+                try {
+                    const translation = await this.deeplService.translate(
+                        selection,
+                        this.settings.toLanguage,
+                        this.settings.fromLanguage
+                    );
+                    const textToAppend = this.settings.appendNewLine ? '\n' + translation[0].text : translation[0].text;
+                    editor.replaceSelection(selection + textToAppend);
+                } catch (error) {
+                    if (error instanceof DeepLException) {
+                        new Notice(error.message);
+                    } else {
+                        console.error(error, error.stack);
+                        new Notice("An unknown error occurred. See console for details.");
+                    }
+                }
+            }
+        });
+
+		this.addCommand({
 			id: "deepl-translate-selection-to",
 			name: "Translate selection: to language",
 			editorCallback: async (editor: Editor) => {

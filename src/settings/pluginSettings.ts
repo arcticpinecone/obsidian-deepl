@@ -5,6 +5,7 @@ export interface DeepLPluginSettings {
 	showStatusBar: boolean;
 	useProAPI: boolean;
 	formality: string;
+	appendNewLine: boolean;
 }
 
 export const formalities: Record<string, string> = {
@@ -20,4 +21,5 @@ export const defaultSettings: Partial<DeepLPluginSettings> = {
 	showStatusBar: true,
 	useProAPI: false,
 	formality: "default",
+	appendNewLine: false,	
 };
